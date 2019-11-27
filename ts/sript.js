@@ -51,16 +51,17 @@ $(function(){
             var ul = document.getElementById("myl"), tb = document.getElementById("tbb") ;
             var li = document.createElement("li"), tr = document.createElement("tr")
                 td = document.createElement("td");;
-            console.log(ui.item);
+            //console.log(ui.item);
+           
             let str = tab+"<td class=\"tel\"><a href=\"magnet:xt:urn:btih:"+ui.item.id+"\">magnet</a></td><td class=\"ter\">"+ui.item.value+"</td>",
                 str1 = "<a href=\"magnet:?xt=urn:btih:"+ui.item.id+"\">magnet</a> "+ui.item.value;
-            
             li.innerHTML = str1;
             ul.appendChild(li);
+            setTimeout(function(){$("#tags")[0].value = "";}, 50)
         }
       });
-    $(".nav-item").on("click", () => console.log("click"))
-
+    $("li").on("click", () => console.log("click"))
+    $("body").on("click", function(){$("#tags")[0].value = "";})
 	function printt(item){
 		console.log(item)
 
