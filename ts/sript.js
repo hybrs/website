@@ -1,4 +1,4 @@
-var path = "data/torr.txt", loaded_data = {},
+var path = "data/torr.txt", loaded_data = [],
     tab = "<table class=\"tb\"><tr>",
     tabend = "</tr></table>";
 
@@ -28,37 +28,64 @@ function readTextFile(file){
 
 $(function(){
     let torrents = JSON.parse(readTextFile(path)).torrents;
+    $.widget( "custom.catcomplete", $.ui.autocomplete, {
+      _create: function() {
+        this._super();
+        this.widget().menu( "option", "items", "> :not(.ui-autocomplete-category)" );
+      },
+      _renderMenu: function( ul, items ) {
+        var that = this,
+          currentCategory = "";
+        $.each( items, function( index, item ) {
+          var li;
+          if ( item.cat != currentCategory ) {
+            ul.append( "<li class='ui-autocomplete-category'>" + item.cat + "</li>" );
+            currentCategory = item.cat;
+          }
+          li = that._renderItemData( ul, item );
+          if ( item.cat ) {
+            li.attr( "aria-label", item.cat + " : " + item.label );
+          }
+        })
+    },
+        _renderItem: function( ul, item ) {
+            let str1 = "<a href=\"magnet:?xt=urn:btih:"+item.id+"\">"+item.value + "  || "+item.dim+" MB</a>";
 
-    //loaded_data[$("#speed")[0].value] = torrents;
-
-    /*$( "#speed" ).selectmenu({
-        select: function( event, ui ) {
-            console.log(ui.item.value)
-            if( !loaded_data[ui.item.value])
-                loaded_data[ui.item.value] = JSON.parse(readTextFile(path+ui.item.value)).torrents;
-            $( "#tags" ).autocomplete({
-                source: loaded_data[ui.item.value]
-            });
-        }
+            if ((loaded_data.indexOf(item.id) > -1))
+                return $( "<li>" )
+                .append( "<div style = \"font-size:0.8em; font-weight: bold; font-style: italic; color:blue;\">"+str1+"</div>" )
+                .appendTo( ul );
+            else
+                return $( "<li>" )
+                .append( "<div style = \"font-size:0.8em;\">"+str1+"</div>" )
+                .appendTo( ul );
+         } 
       });
-*/
 
     //console.log(torrents);
-    $( "#tags" ).autocomplete({
+    $( "#tags" ).catcomplete({
         source: torrents,
         minLength: 4,
+        response: function( event, ui ) {
+            ui.content.sort(function (a, b) {
+                let ress = a.cat.localeCompare(b.cat); 
+                if (ress == 0) return a.value.localeCompare(b.value); 
+                return ress;/*a.year <= b.year*/;});
+            },
         select: function (event, ui){
-            var ul = document.getElementById("myl"), tb = document.getElementById("tbb") ;
-            var li = document.createElement("li"), tr = document.createElement("tr")
-                td = document.createElement("td");;
+            var ul = document.getElementById("myl");
+            var li = document.createElement("li");
             //console.log(ui.item);
            
             let str = tab+"<td class=\"tel\"><a href=\"magnet:xt:urn:btih:"+ui.item.id+"\">magnet</a></td><td class=\"ter\">"+ui.item.value+"</td>",
-                str1 = "<a href=\"magnet:?xt=urn:btih:"+ui.item.id+"\">magnet</a> "+ui.item.value;
+                str1 = "<a href=\"magnet:?xt=urn:btih:"+ui.item.id+"\">magnet</a> "+ui.item.value + " "+ui.item.dim+" MB";
+            if( !(ui.item.id in loaded_data)){
+            loaded_data.push(ui.item.id)    
             li.innerHTML = str1;
             ul.appendChild(li);
-            setTimeout(function(){$("#tags")[0].value = "";}, 50)
+            setTimeout(function(){$("#tags")[0].value = "";}, 50)}
         }
+        
       });
     $("li").on("click", () => console.log("click"))
     $("body").on("click", function(){$("#tags")[0].value = "";})
@@ -66,52 +93,4 @@ $(function(){
 		console.log(item)
 
 	}
-/*
-	$('#autocomplete').click(function (e){this.value=""});
-
-    $('#autocomplete').autocomplete({
-        source: function(request, response) {
-          
-            let terms = request.term.toLowerCase().split(' '),
-                matchers = []
-            
-            terms.map(function (el){matchers.push(new RegExp($.ui.autocomplete.escapeRegex(el), "i"))})
-  
-          let resultset = [];
-          $.each(torrents, function() {
-            let t = this.value;
-            if (this.value && (!request.term || str_match(matchers, t)))
-               resultset.push(this)
-
-          });
-            $('#badge').html(resultset.length)
-            resultset = resultset.length > 200 ? resultset.slice(0,200) : resultset;
-            
-            //$('#area-paper-badge').html(resultset.length)
-         response(resultset);
-
-        },
-        minLength : 5,
-        response: function( event, ui ) {
-//            console.log("ui.content");
-//            console.log(ui.content);
-            ui.content.sort(function (a, b) {
-                return b.score-a.score;});
-//            console.log("ui.content sort");
-//
-        },
-        select: function (event, ui) {
-        	printt(ui.item)
-            setTimeout(function(){$('#autocomplete')[0].value = ""}, 200)
-            $('#badge').html("")
-        }
-      })
-    
-    $('#autocomplete')
-    	.on("focus", function(){$('#area-paper-badge').html("")})
-	  	.on("input", function(key){
-	        if(this.value.length < 5) 
-	            $(".badge").html("")
-	    })
-*/
 });
