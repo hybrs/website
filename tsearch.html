@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script type="text/javascript">
+	torrents = 0;//get file
+
+	function printt(item){
+		console.log(item)
+
+	}
+
+	$('#autocomplete').click(function (e){this.value=""});
+
+    $('#autocomplete').autocomplete({
+        open : function(){
+            let d = $("#ui-id-3").height() + 25
+            if(_docHeight-heightAG-100 < 210)
+                $(".ui-autocomplete:visible").css({top:"-="+d});
+        },
+        source: function(request, response) {
+          
+            let terms = request.term.lower().split(' '),
+                matchers = []
+            
+            terms.map(function (el){matchers.push(new RegExp($.ui.autocomplete.escapeRegex(el), "i"))})
+  
+          let resultset = [];
+          $.each(torrents, function() {
+            let t = this.value;
+            if (this.value && (!request.term || str_match(matchers, t)))
+               resultset.push(this)
+
+          });
+            $('#badge').html(resultset.length)
+            resultset = resultset.length > 200 ? resultset.slice(0,200) : resultset;
+            
+            //$('#area-paper-badge').html(resultset.length)
+         response(resultset);
+
+        },
+        minLength : 5,
+        response: function( event, ui ) {
+//            console.log("ui.content");
+//            console.log(ui.content);
+            ui.content.sort(function (a, b) {
+                return b.score-a.score/*a.year <= b.year*/;});
+//            console.log("ui.content sort");
+//
+        },
+        select: function (event, ui) {
+        	printt(ui.item)
+            setTimeout(function(){$('#autocomplete')[0].value = ""}, 200)
+            $('#badge').html("")
+        }
+      })
+    
+    $('#autocomplete')
+    	.on("focus", function(){$('#area-paper-badge').html("")})
+	  	.on("input", function(key){
+	        if(this.value.length < 5) 
+	            $(".badge").html("")
+	    })
+</script>
+</html>
