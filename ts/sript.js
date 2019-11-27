@@ -53,7 +53,7 @@ $(function(){
                 td = document.createElement("td");;
             console.log(ui.item);
             let str = tab+"<td class=\"tel\"><a href=\"magnet:xt:urn:btih:"+ui.item.id+"\">magnet</a></td><td class=\"ter\">"+ui.item.value+"</td>",
-                str1 = "<a href=\"magnet:xt:urn:btih:"+ui.item.id+"\">magnet</a> "+ui.item.value;
+                str1 = "<a href=\"magnet:?xt:urn:btih:"+ui.item.id+"\">magnet</a> "+ui.item.value;
             
             li.innerHTML = str1;
             ul.appendChild(li);
