@@ -1,6 +1,7 @@
 var path = "data/torr.txt", loaded_data = [],
     tab = "<table class=\"tb\"><tr>",
-    tabend = "</tr></table>";
+    tabend = "</tr></table>",
+    magnetico = "<i class=\"fa fa-magnet\" style=\"font-size:15px;color:red;\"></i>";
 
 function str_match(matchers, t){
     let res = true;
@@ -53,11 +54,11 @@ $(function(){
 
             if ((loaded_data.indexOf(item.id) > -1))
                 return $( "<li>" )
-                .append( "<div style = \"font-size:0.8em; font-weight: bold; font-style: italic; color:blue;\">"+str1+"</div>" )
+                .append( "<div style = \"font-size:0.8em; font-weight: bold; font-style: italic; color:blue; width:90%;\">"+str1+"</div>" )
                 .appendTo( ul );
             else
                 return $( "<li>" )
-                .append( "<div style = \"font-size:0.8em;\">"+str1+"</div>" )
+                .append("<div style = \"font-size:0.8em;\">"+str1+"</div>" )
                 .appendTo( ul );
          } 
       });
@@ -65,7 +66,7 @@ $(function(){
     //console.log(torrents);
     $( "#tags" ).catcomplete({
         source: torrents,
-        minLength: 4,
+        minLength: 3,
         response: function( event, ui ) {
             ui.content.sort(function (a, b) {
                 let ress = a.cat.localeCompare(b.cat); 
@@ -77,12 +78,13 @@ $(function(){
             var li = document.createElement("li");
             //console.log(ui.item);
            
-            let str = tab+"<td class=\"tel\"><a href=\"magnet:xt:urn:btih:"+ui.item.id+"\">magnet</a></td><td class=\"ter\">"+ui.item.value+"</td>",
+            let str ="<tr><td class=\"tdtile\">"+ui.item.value+" "+(ui.item.descr ?  ui.item.descr : "") +"</td><td class=\"tddim\">"+ui.item.dim+"</td><td class=\"tdseed\">"+(ui.item.seed ? ui.item.seed : "?")+"</td><td class=\"tdleech\">"+(ui.item.seed ? ui.item.leech : "?")+"</td><td class=\"tdupload\">"+ui.item.data+"</td><td class=\"tdmagnet\"><a href=\"magnet:?xt=urn:btih:"+ui.item.id+"\">"+magnetico+"</a></td></tr>";
                 str1 = "<a href=\"magnet:?xt=urn:btih:"+ui.item.id+"\">magnet</a> "+ui.item.value + " "+ui.item.dim+" MB";
             if( !(ui.item.id in loaded_data)){
             loaded_data.push(ui.item.id)    
-            li.innerHTML = str1;
-            ul.appendChild(li);
+            //li.innerHTML = str1;
+            //ul.appendChild(li);
+            $("#tbb")[0].innerHTML += str;
             setTimeout(function(){$("#tags")[0].value = "";}, 50)}
         }
         

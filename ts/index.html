@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="">
   <meta name="author" content="">
-
+  <link rel="icon" href="icon.png" >
   <title>Torrent Search</title>
     <!-- Bootstrap core JavaScript -->
     <script src="vendor/jquery/jquery.slim.min.js"></script>
@@ -15,6 +15,7 @@
       <!-- Bootstrap core JavaScript -->
   <script type="text/javascript" src="jquery-3.3.1.min.js"></script>
   <script type="text/javascript" src="jquery-ui.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <!-- Bootstrap core CSS -->
   <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -27,6 +28,21 @@
       /* prevent horizontal scrollbar */
       overflow-x: hidden;
     }
+    table {
+      font-family: 'Courier New', Courier, monospace;
+      border-collapse: collapse;
+      font-size: 0.8em;
+    }
+
+    td, th {
+      border: 1px solid #dddddd;
+      text-align: center;
+      padding: 1px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #dddddd;
+  }
     /* IE 6 doesn't support max-height
      * we use height instead, but this forces the menu to always be this tall
      */
@@ -39,6 +55,10 @@
     margin: .8em 0 .2em;
     line-height: 1.5;
   }
+  #tbb{
+    width: 110%;
+    transform: translateX(-5%);
+}
   </style>
 
 </head>
@@ -58,7 +78,16 @@
         </div>
         <br>
         <fieldset>
-            <table class="tbb">
+          <br>
+            <table id="tbb">
+                    <tr>
+                      <th>Titolo</th>
+                      <th>Dimesnione (MB)</th>
+                      <th>Seed</th>
+                      <th>Leech</th>
+                      <th>Data Upload/Ultimo Check</th>
+                      <th>Magnet</th>
+                    </tr>
             </table>
 
         <ul id="myl" class="list-unstyled">
