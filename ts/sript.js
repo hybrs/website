@@ -1,4 +1,4 @@
-var tntpath = "data/tnt.txt", ntntpath = "data/notnt0.txt", ntntpath1 = "data/notnt1.txt", loaded_data = [],
+var tntpath = "data/tnt.txt", start = true, ntntpath = "data/notnt0.txt", ntntpath1 = "data/notnt1.txt", loaded_data = [],
     tab = "<table class=\"tb\"><tr>",
     tabend = "</tr></table>", itt = [],
     magnetico = "<i class=\"fa fa-magnet\" style=\"font-size:15px;color:red;\"></i>";
@@ -67,7 +67,7 @@ $(function(){
     disabled: true
   });
 
-    var torrents = [JSON.parse(readTextFile(tntpath)).torrents,JSON.parse(readTextFile(ntntpath)).torrents.concat(JSON.parse(readTextFile(ntntpath1)).torrents)];//JSON.parse(readTextFile(path)).torrents;
+    var torrents = [JSON.parse(readTextFile(tntpath)).torrents,JSON.parse(readTextFile(ntntpath)).torrents];//JSON.parse(readTextFile(path)).torrents;
     
     $.widget( "custom.catcomplete", $.ui.autocomplete, {
       _create: function() {
@@ -134,6 +134,16 @@ $(function(){
       $( "#speed" ).selectmenu({
         disabled: false,
         select: function (event, ui){
+
+          if(start && ui.item.index > 0){
+            start = false;
+            $( "#speed" ).selectmenu({ disabled: true})
+            $( "#tags" ).catcomplete({ disable: true})
+            torrents[1] = torrents[1].concat(JSON.parse(readTextFile(ntntpath1)).torrents)
+            $( "#speed" ).selectmenu({ disabled: false})
+            $( "#tags" ).catcomplete({ disabled: false})
+          }
+
           $( "#tags" ).catcomplete({
             source: ui.item.index < 2 ? torrents[ui.item.index] : torrents[0].concat(torrents[1])
         })}
