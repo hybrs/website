@@ -113,6 +113,7 @@ $(function(){
                 let ress = a.cat.localeCompare(b.cat); 
                 if (ress == 0) return a.value.localeCompare(b.value); 
                 return ress;/*a.year <= b.year*/;});
+
             },
         select: function (event, ui){
             var ul = document.getElementById("myl");
