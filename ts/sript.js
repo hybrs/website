@@ -23,14 +23,22 @@ function print_query(){
       if(i > 0) text+="</table><hr>";
       text += "<h4>"+item.cat+"</h4><table class=\"restab\">";
     }
-    text += "<tr id = \""+item.id+"\" class =\"res\"><td class=\"tdtile\">"+item.value+" "+(item.descr ?  item.descr : "") +"</td><td class=\"tddim\">"+item.dim+"</td><td style = \"color:green\" class=\"tdseed\">"+(item.seed ? item.seed : "?")+"</td><td style = \"color:red\" class=\"tdleech\">"+(item.seed ? item.leech : "?")+"<td class=\"tdmagnet\"><a href=\"magnet:?xt=urn:btih:"+item.id+"\">"+magnetico+"</a></td></tr>";
+    let stt = "";
+    if( loaded_data.indexOf(item.id) >= 0)
+      stt= "\"font-weight: bold; font-style: italic; color:blue;\""
+
+    text += "<tr id = \""+item.id+"\" class =\"res\"><td class=\"tdtile\" style="+stt+" >"+item.value+" "+(item.descr ?  item.descr : "") +"</td><td class=\"tddim\">"+item.dim+"</td><td style = \"color:green\" class=\"tdseed\">"+(item.seed > 0 ? item.seed : "?")+"</td><td style = \"color:red\" class=\"tdleech\">"+(item.leech > 0 ? item.leech : "?")+"<td class=\"tdmagnet\"><a href=\"magnet:?xt=urn:btih:"+item.id+"\">"+magnetico+"</a></td></tr>";
   }
   text+"</table>";
   $("#queryresult")[0].innerHTML = text;
   $(".res").on("click", function(){
-    if( !(this.id in loaded_data)){
+    if( !(loaded_data.indexOf(this.id) >= 0)){
       loaded_data.push(this.id)
-      $("#tbb")[0].innerHTML += $(this)[0].innerHTML;}})
+      $("#tbb")[0].innerHTML += $(this)[0].innerHTML;
+      $(this.childNodes[0]).css("font-weight", "bold")
+      $(this.childNodes[0]).css("font-style", "italic")
+      $(this.childNodes[0]).css("color", "blue")
+    }})
 }
   
  
@@ -87,7 +95,7 @@ $(function(){
 
             if ((loaded_data.indexOf(item.id) > -1))
                 return $( "<li>" )
-                .append( "<div style = \"font-size:0.8em; font-weight: bold; font-style: italic; color:blue; width:90%;\">"+str1+"</div>" )
+                .append( "<div style = \"font-size:0.8em; font-weight: bold; font-style: italic; color:blue;\">"+str1+"</div>" )
                 .appendTo( ul );
             else
                 return $( "<li>" )
@@ -111,9 +119,9 @@ $(function(){
             var li = document.createElement("li");
             //console.log(ui.item);
            
-            let str ="<tr><td class=\"tdtile\">"+ui.item.value+" "+(ui.item.descr ?  ui.item.descr : "") +"</td><td class=\"tddim\">"+ui.item.dim+"</td><td class=\"tdseed\">"+(ui.item.seed ? ui.item.seed : "?")+"</td><td class=\"tdleech\">"+(ui.item.seed ? ui.item.leech : "?")+"<td class=\"tdmagnet\"><a href=\"magnet:?xt=urn:btih:"+ui.item.id+"\">"+magnetico+"</a></td></tr>";
+            let str ="<tr><td class=\"tdtile\">"+ui.item.value+" "+(ui.item.descr ?  ui.item.descr : "") +"</td><td class=\"tddim\">"+ui.item.dim+"</td><td class=\"tdseed\">"+(parseInt(ui.item.seed)  > 0 ? ui.item.seed : "?")+"</td><td class=\"tdleech\">"+(parseInt(ui.item.leech) > 0 ? ui.item.leech : "?")+"<td class=\"tdmagnet\"><a href=\"magnet:?xt=urn:btih:"+ui.item.id+"\">"+magnetico+"</a></td></tr>";
                 str1 = "<a href=\"magnet:?xt=urn:btih:"+ui.item.id+"\">magnet</a> "+ui.item.value + " "+ui.item.dim+" MB";
-            if( !(ui.item.id in loaded_data)){
+            if( !(loaded_data.indexOf(ui.item.id) >= 0)){
             loaded_data.push(ui.item.id)    
             //li.innerHTML = str1;
             //ul.appendChild(li);
