@@ -22,6 +22,11 @@
   <link rel="stylesheet" href="https://jqueryui.com/resources/demos/style.css">
 
   <style>
+
+    body{
+      background-color: rgba(125, 157, 160, 0.142);
+    }
+
     .ui-autocomplete {
       max-height: 400px;
       overflow-y: auto;
@@ -59,8 +64,14 @@
     width: 10%;
   }
 
+  .res:hover{
+    background-color: rgba(245, 177, 150, 0.782);
+    cursor: pointer;
+  }
+
   .tdmagnet{
     width: 3%;
+    cursor: pointer;
   }
     /* IE 6 doesn't support max-height
      * we use height instead, but this forces the menu to always be this tall
@@ -88,21 +99,22 @@
       <div class="col-lg-12 text-center">
         <h2 class="mt-5">Torrent Search</h2>
         <label for="speed">Scelgi la fonte</label>
-        <select name="speed" id="speed">
+        <select name="speed" id="speed" style="width: 50px;">
           <option selected="selected">TNT Village (ITA) [100k torrents]</option>
-          <option> Altre fonti (PirateBay, Kickass...) [500K Torrents]</option>
-          <option> TNT Village + altre fonti [600K Torrents]</option>
+          <option>Altre fonti (PirateBay, Kickass...) [500K Torrents]</option>
+          <option>TNT Village + altre fonti [600K Torrents]</option>
         </select>
        <hr>
         <div class="ui-widget">
           <table id="tsearch" style="width: 100%;">
             <tr>
+                <td style="width: 7%; font-size: 0.8em; border: 0px;">
+                    <button id="cerca" class="ui-button ui-widget ui-corner-all">Cerca</button>
+                </td>
               <td style="width: 90%; border: 0px;">
                   <input id="tags" placeholder="Find torrents..." style="border-radius:3%; border-width: 1px; border-color:lightgray; width: 100%">        
               </td>
-              <td style="width: 7%; font-size: 0.8em; border: 0px;">
-                  <button id="cerca" class="ui-button ui-widget ui-corner-all">Cerca</button>
-              </td>
+              
             </tr>
           </table>
           </div>

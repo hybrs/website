@@ -11,21 +11,29 @@ function str_match(matchers, t){
 }
 
 function print_query(){
-  let cat = "", text = "";
+  let cat = "", text = "<hr><h3>"+itt.length+" torrent trovati:</h3>", i = 0;
+
   $("#queryresult")[0].innerHTML = "";
-  for(let i = 0; i < itt.length;i++){
+  if ($("#tags")[0].value != ""){
+
+  for(i = 0; i < itt.length;i++){
     let item = itt[i]; 
     if(item.cat != cat){
       cat = item.cat;
-      if(i > 0)
-        text+"</table>";
-      text += "<hr><h4>"+item.cat+"</h4><table class=\"restab\">";
+      if(i > 0) text+="</table><hr>";
+      text += "<h4>"+item.cat+"</h4><table class=\"restab\">";
     }
     text += "<tr id = \""+item.id+"\" class =\"res\"><td class=\"tdtile\">"+item.value+" "+(item.descr ?  item.descr : "") +"</td><td class=\"tddim\">"+item.dim+"</td><td style = \"color:green\" class=\"tdseed\">"+(item.seed ? item.seed : "?")+"</td><td style = \"color:red\" class=\"tdleech\">"+(item.seed ? item.leech : "?")+"<td class=\"tdmagnet\"><a href=\"magnet:?xt=urn:btih:"+item.id+"\">"+magnetico+"</a></td></tr>";
-    
   }
-  
+  text+"</table>";
   $("#queryresult")[0].innerHTML = text;
+  $(".res").on("click", function(){
+    if( !(this.id in loaded_data)){
+      loaded_data.push(this.id)
+      $("#tbb")[0].innerHTML += $(this)[0].innerHTML;}})
+}
+  
+ 
 }
 
 function readTextFile(file){
@@ -51,12 +59,7 @@ $(function(){
     disabled: true
   });
 
-  $("#load").css("width", ()=> $("body")[0].clientWidth)
-  .css("height", ()=> $("body")[0].clientHeight)
-  
     var torrents = [JSON.parse(readTextFile(tntpath)).torrents,JSON.parse(readTextFile(ntntpath)).torrents.concat(JSON.parse(readTextFile(ntntpath1)).torrents)];//JSON.parse(readTextFile(path)).torrents;
-    
-    
     
     $.widget( "custom.catcomplete", $.ui.autocomplete, {
       _create: function() {
@@ -124,12 +127,12 @@ $(function(){
         disabled: false,
         select: function (event, ui){
           $( "#tags" ).catcomplete({
-            source: ui.item.index < 3 ? torrents[ui.item.index] : torrents[0].concat(torrents[0])
+            source: ui.item.index < 2 ? torrents[ui.item.index] : torrents[0].concat(torrents[1])
         })}
       });
     
       $("#cerca").on("click", print_query)
 
-    $("li").on("click", () => console.log("click"))
+
     $("body").on("click", function(){$("#tags")[0].value = "";})
 });
