@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>QueryNet</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, height=device-height">
+        <script type="text/javascript" src="src\jquery-3.3.1.min.js"></script>
+        <script type="text/javascript" src="src/d3.v4.min.js"></script>
+        <link rel="icon" href="imgs/logo-ico.ico" >
+        <link rel="stylesheet" href="css\bootstrap.min.css">
+        <script src="src\bootstrap.min.js"></script>
+       <!-- <script type="text/javascript" src="src/jquery.autocomplete.js"></script> -->
+        <script src="src/jquery-ui.js"></script>
+        <link rel="stylesheet" href="css/jquery-ui.css">
+        <link rel="stylesheet" href="css/theme.css">
+    </head>
+<body>
+
+    
+
+
+        
+<div class="container-fluid" id= "all">
+    <form id="myform" style="width: auto;height: auto;"><textarea id="biblio-txt-test" style="max-height: 130px; height: 130px;" cols="100" placeholder="Paste your references here, one for each line…" rows="2"></textarea>
+        <button id="cit-btn-test" type="button">Parse</button> </form>
+    <hr>
+    <!-- Query Result InfoBox -->
+    <div id="biblio-dialog-txt" style=" border-bottom: black; width: 100%;height: 150px; overflow-y: auto;">
+    <div id="all1">
+
+    </div>
+    </div>
+    <hr>
+    <!-- Paper Graph -->
+    <div id="pg" style="width: 100%; height: auto; overflow-y: auto; border: black;">
+    <svg id = "svgAxis" class = "svg" style="width: 100%; height: 800px">
+        <defs>
+            <linearGradient id="grad_v" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop id = "firstStopS" offset="0%" style="stop-color:#ffff99;stop-opacity:1"/>
+
+                <stop id="thirdStopS" offset="100%" style="stop-color:#00cc99;stop-opacity:1"  />
+            </linearGradient>
+        </defs>
+        <rect id="cmpa" class = "cmpClass pop-up" x="20" y="160" width="10px" title = "Is a color-map associated with the number of in-citations. The steps are 0 and 100." height="36%" fill="url(#grad_v)" text ="100" ry="6px" />
+
+    </svg>
+    <svg id = "svgP" class = "svg" style="width: 100%" height= 800px >
+    </svg>
+    </div>
+</div>           
+<script src="src\author-graph.js"></script>
+<script src="src\undoredo.js"></script>
+<script src="src\script.js"></script>
+<script src="src\import.js"></script>
+<script src="src\paper-graph.js"></script>
+<script src="src\pan-zoom.js"></script>
+<script src="src\export.js"> </script>
+<script src="src\authTable.js"></script>
+<script src="src\import-biblio.js"></script>
+<script src="src\mouse-handlers.js"></script>
+<script src="src\toolbox.js"></script>
+
+<script>
+$(function (){
+
+    function push_paper(name, year){
+        inC = []
+        outC = []
+        if(!idPs.includes(idP)){
+            idPs[idPs.length] = idP
+            papersPrint.push(idP)
+            AP = []
+            ANP = []
+            papersCit[idP] = [[], []];
+
+            write = true;
+            let tempCits = citations.filter(citFilter);
+            write = false;
+            for(var i = 0; i<inC.length; i++)
+                papersCit[idP][0].push(inC[i])
+            for(var i = 0; i<outC.length; i++)
+                papersCit[idP][1].push(outC[i])
+            citPrint = citPrint.concat(tempCits)
+            papersFiltered = papers.filter(paperFilter)
+            updateADpapers()
+            updateColor()
+            getAP()
+            getANP()
+        }
+    }
+
+    function graph_stats(){return ""}
+
+    function paper_graph(papers1, citations1, idPs, simulation){
+        simulation.stop()
+        d3.select("#svgP").remove()
+        d3.select("#pg").append("svg").attr("id", "svgP")
+        getPaperSvg()
+        
+        zoomFact = 1
+        
+        let svg = svgP
+        svg.attr("y", "120")
+        svg.attr("width", "100%")
+    
+        d3.select("#scale").remove()
+        d3.select("#pn").text(idPs.length).attr("x", 65)
+        .attr('dy', 25).append('tspan').attr("class", "label-txtspan").attr("id", "npn")
+        .attr("x", 65)
+        .attr('dy', 30)
+        .text(papersFiltered.length)
+        d3.select("#svgAxis").append('text').attr("class", "label-txtspan").attr("id", "scale")
+        .attr("x", () => width-150)
+        .attr('y', 45)
+        .text("Y-force = "+zoomFact.toFixed(1)+"X")
+        d3.select("#reset-button").attr("cx", () => width-165)
+        .attr("cy", () => 42)
+        
+        
+        var link = svg.append("g")
+            .attr("class", "citations")
+            .selectAll("line")
+            .data(citations1)
+            .enter().append("line")
+            .attr("class", "plink")
+            .attr("stroke-width", "2px")
+            .style("pointer-events", "none")
+        
+        var node = svg.append("g")
+            .attr("class", "papers")
+            .selectAll("circle")
+            .data(papers1)
+            .enter().append("circle")
+            .attr("class", "papersNode")
+            .attr("id", function(d){return "p"+d.id})
+            .attr("r", (d)=>pap_radius(d))
+            .attr("stroke", function(d){
+                if(idPs.includes(d.id))
+                    return "#4238ff"
+                    //return "#6d10ca";
+                else return "#999";
+                })
+            .attr("stroke-width", function(d){
+                if(idPs.includes(d.id))
+                    return 2.5;
+                })
+            
+            .attr("fill", function(d) {
+                if(c20)
+                    return color_j(d)
+                else return color_n(d.color)}
+                /*
+                if (idPs.includes(d.id)) return "rgba( 117, 65, 214, 0.81 )";
+                else return "rgba( 64, 145, 215, 0.519 )";}*/)
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended))
+            .on("click", clickHandler)
+            .on("mouseover", handleMouseOver)
+            .on("mouseout", handleMouseOut)
+            .on("dblclick", function(d) {
+                //console.log("dbl "+ idPs.includes(d.id))
+                zoom_by(1)
+                if(idPs.includes(d.id)) deleteP(d.id)
+                    else addPaper(d, true)
+                event.stopPropagation()
+                event.preventDefault()
+            })
+            
+    popRect = svgP.append("rect")
+            .attr('x',0)
+            .attr('y',-10)
+            .attr('width',0)
+            .attr('height',0)
+            .attr('fill',"rgba( 221, 167, 109, 0.842 )")
+            .attr('opacity',0)
+            .style("border-radius", "10px")
+    popText = svgP.append("text")
+            .attr("x", 0)             
+            .attr("y", 0)
+            .attr("text-anchor", "left")  
+            .style("font-size", "11px")
+            .attr("fill", "rgba( 2, 2, 2, 0.961 )")
+            .attr("opacity",0)
+            .text("");
+    for(var i = 0; i < papers1.length; i++)
+        svg.append("text")
+            .attr("id", function(){return "txt"+papers1[i].id})
+            .attr("x", -100)             
+            .attr("y", -100)
+            .attr("text-anchor", "center")  
+            .style("font-size", "0.7em")
+            .attr("fill", "rgba( 2, 2, 2, 0.961 )")
+            .attr("opacity",0)
+            .text(function(){return papers1[i].value});
+    
+        function ticked() {
+            
+            node
+                .attr("cx", function(d) { 
+                var nX = xConstrained(d.year);
+                return nX; })
+                .attr("cy", function(d) { 
+                    let offs = 0, ny = Math.max(10 + offs, Math.min(heightP - 20 - offs, d.y));
+                    d3.select(this).attr("baseY", () => ny ) 
+                return ny; })
+            
+            link
+                .attr("x1", function(d) { return xConstrained(d.source.year); })
+                .attr("y1", function(d) { return d.source.y;
+                    /*                     
+                    let ny = Math.max(30, Math.min(heightP - 20, d.source.y));
+                    d3.select(this).attr("baseY1", () => ny ) 
+                    return ny; */; })
+                .attr("x2", function(d) { return xConstrained(d.target.year); })
+                .attr("y2", function(d) { return d.target.y;
+                                        /*
+                    let ny = Math.max(30, Math.min(heightP - 20, d.target.y));
+                    d3.select(this).attr("baseY2", () => ny ) 
+                    return ny;*/})
+                .attr("stroke", function(d) {
+                if(d.source.year === d.target.year)
+                return "lightgray";
+                else return d.source.x < d.target.x ? "url(#gradxX)":"url(#gradXx)";
+            })
+            
+        }
+        
+        if(simulation){
+            
+            simulation
+                .nodes(papers1)
+                .on("tick", ticked)
+
+            simulation.force("link")
+                .links(citations1);
+            simulation.alpha(1).alphaMin(0.02).alphaDecay(0.02).restart()
+        }
+        d3.selectAll(".dblp").on("click", function(){d3.event.stopPropagation()})
+
+        svg_handlers()
+        centerSvg()
+
+    }
+
+    function printQueryEl(idq){
+        let idc = current_query_result[idq].idx, 
+            paprs = current_query_result[idq].bestm,
+            query = current_query_result[idq].query, i = 0,
+            ret = ``;
+
+        for( i = 0; i< paprs.length; i++){
+            let papr = papers[paprs[i].paper],
+                auths = pap_auths1(papr), 
+                title = papr.value, year = papr.year, 
+                jon = papr.jN ? papr.jN : papr.venue;
+            
+            ret += `<p>${year} ${auths}: <span class="eli-pap">${title}</span> ${jon}<span style="float:right; font-style:oblique">${paprs[i].count}</span></p>`
+            if(i != paprs.length -1 ) ret += `<br>`
+            else ret += `</td>`//<td><button id="cqb${idq}" class="confirm_parse" type="button">Confirm paper</button></td>`
+        }
+        return ret
+    }
+
+    document.getElementById('pg').style.height = ($(window).height() - 250 - $("#myform").height()).toString()+"px";
+    
+    $("#biblio-txt-test").on("mousemove", function () {
+        document.getElementById('pg').style.height = ($(window).height() - 250 - $("#myform").height()).toString()+"px";
+   })
+
+    $(window).on("resize", function () {
+        document.getElementById('pg').style.height = ($(window).height() - 250 - $("#myform").height()).toString()+"px";
+  })
+
+    
+
+
+    choosen_j = "cg"
+    let instance  = choosen_j
+     if(!j_lists[instance]){
+        j_lists[instance] = {'j_list':[], 'texts':[], 'stats':[]}
+        //scarico file x e creo jlist e texts
+        readJournals("datasets/j_"+instance+"_2018-05-03.txt", instance)
+    }
+
+             
+    let ppath = "datasets/p_"+choosen_j+version,
+            apath = "datasets/a_"+choosen_j+version;
+
+    console.log("Loading data")
+    import_ds(ppath, apath)
+    console.log("Data Loaded")
+    document.getElementById("svgAxis").style.visibility = "visible";
+    width = $("#pg").width()
+    w = width
+    xConstrained = d3.scaleLinear()
+        .domain([minYear, maxYear])
+        .range([10, width - 20]),
+    xaxis = d3.axisBottom().scale(xConstrained)
+    if(start){
+        let delta = maxYear-minYear
+        if(delta > 30) delta = delta/2
+        xaxis.scale(xConstrained).ticks(delta, "r");
+        svgAxis = d3.select("#svgAxis").attr("y", "80")  
+        svgAxis.append("g").attr("id", "axis").call(xaxis);
+        document.getElementById("svgAxis").style.visibility = "visible";
+        add_labels()
+        start = false;
+    }
+    
+
+    getPaperSvg()
+
+  //document.getElementById("svgAxis").style.visibility = "hidden";
+    popRectAx = d3.select("#svgAxis").append("rect")
+    .attr('x',0)
+    .attr('y',-10)
+    .attr('width',0)
+    .attr('height',0)
+    .attr('fill',"rgba( 221, 167, 109, 0.842 )")
+    .attr('opacity',0)
+    .style("border-radius", "10px")
+    popTextAx = d3.select("#svgAxis")
+    .append("text")
+    .attr("x", 0)             
+    .attr("y", 0)
+    .attr("text-anchor", "left")  
+    .style("font-size", "11px")
+    .attr("fill", "rgba( 2, 2, 2, 0.961 )")
+    .attr("opacity",0)
+    .text("");
+
+    simulation = setSimulation()
+        
+    alert("data loaded")
+
+    $("#cit-btn-test").on("click", function (){
+        let len = document.getElementById("biblio-txt-test").value.split('\n\n').length,
+            URL = "http://128.148.7.71/citations/create",
+            URL1 = "http://anystyle.isti.cnr.it",
+            query =  clean_biblio_query(document.getElementById("biblio-txt-test").value),
+            params = 'query='+query.join("\n"),
+            i = 0, titles = [], result = [], query_tab =  `<table id="query_tab"><tbody>`,
+            chosenpps = [];
+        
+        for(i = 0; i< query.length; i++)
+            titles.push(query[i])
+        
+        result = p_search(titles, query)
+        current_query_result = result
+        //print_query_result(res)
+        
+        for(i =0; i<result.length; i++){
+
+            let idq = i,
+                chosen_p_idx = current_query_result[idq].bestm[current_query_result[idq].idx].paper,
+                papr = papers[chosen_p_idx],
+                query = current_query_result[idq].query,
+                auths = pap_auths1(papr), title = papr.value, year = papr.year, jon = papr.jN ? papr.jN : papr.venue;
+            
+            push_paper(papr.value, papr.year)
+            query_tab +=  `<tr id="q${idq}"><td class="query">
+                <p>Query: ${query}</p><hr style="margin: 5px;" />`;/*
+                <p>Result: ${year} ${auths}: <span class="eli-pap">
+                ${title}</span> ${jon}</p></button></td><td>`;*/
+            
+            query_tab += printQueryEl(i)
+        }
+        query_tab +=`</tr></tbody></table>`;
+
+        /*Draw graph*/
+
+        if(papersFiltered.length > 0 && papersFiltered)
+            paper_graph(papersFiltered, citPrint, idPs, simulation)
+
+        document.getElementById("all1").innerHTML = 
+            "Parsing result"+
+            "<hr>"+ query_tab+`<br>${graph_stats()}`;
+
+    });
+
+
+
+});
+    //Send the proper header information along with the request
+    
+    //http.open('POST', URL1, true);
+    //http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+/*
+    http.onload = function (e) {
+    if (http.readyState === 4) {
+        if (http.status === 200) {
+            response = JSON.parse(http.responseText)
+            //console.log(response)
+          import_from_biblio(response, query);
+        } else {
+          console.error(http.statusText);
+        }
+      }
+    };
+    http.onerror = function (e) {
+      console.error(http.statusText);
+        alert("Some error occurred, check the connection and try again.")
+    };
+
+    http.send(params);
+    })
+*/  
+    
+   
+/*
+query -> best-matches -> grafo best-matches
+*/ 
+
+
+
+
+</script>
+
+
+</body>
+</html>
