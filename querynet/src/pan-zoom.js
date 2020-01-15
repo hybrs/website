@@ -41,6 +41,7 @@ function svg_handlers(){
           event.preventDefault()
          event.stopPropagation()
         });
+        
 }
 
 function centerSvg(){

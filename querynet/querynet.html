@@ -9,7 +9,6 @@
         <link rel="icon" href="imgs/logo-ico.ico" >
         <link rel="stylesheet" href="css\bootstrap.min.css">
         <script src="src\bootstrap.min.js"></script>
-       <!-- <script type="text/javascript" src="src/jquery.autocomplete.js"></script> -->
         <script src="src/jquery-ui.js"></script>
         <link rel="stylesheet" href="css/jquery-ui.css">
         <link rel="stylesheet" href="css/theme.css">
@@ -61,35 +60,13 @@
 <script src="src\toolbox.js"></script>
 
 <script>
-$(function (){
+    /*
 
-    function push_paper(name, year){
-        inC = []
-        outC = []
-        if(!idPs.includes(idP)){
-            idPs[idPs.length] = idP
-            papersPrint.push(idP)
-            AP = []
-            ANP = []
-            papersCit[idP] = [[], []];
-
-            write = true;
-            let tempCits = citations.filter(citFilter);
-            write = false;
-            for(var i = 0; i<inC.length; i++)
-                papersCit[idP][0].push(inC[i])
-            for(var i = 0; i<outC.length; i++)
-                papersCit[idP][1].push(outC[i])
-            citPrint = citPrint.concat(tempCits)
-            papersFiltered = papers.filter(paperFilter)
-            updateADpapers()
-            updateColor()
-            getAP()
-            getANP()
-        }
-    }
-
-    function graph_stats(){return ""}
+    Utility functions
+    
+    */
+    function graph_stats(){return `${idPs.length} expanded papers<br>${papersPrint.length} 
+    total papers in the network<br>${citPrint.length} citations...`}
 
     function paper_graph(papers1, citations1, idPs, simulation){
         simulation.stop()
@@ -239,9 +216,11 @@ $(function (){
         }
         d3.selectAll(".dblp").on("click", function(){d3.event.stopPropagation()})
 
-        svg_handlers()
-        centerSvg()
-
+        
+        /*
+        Center svg
+        */
+        document.getElementById('pg').scrollTop = (heightP)/2;
     }
 
     function printQueryEl(idq){
@@ -263,19 +242,27 @@ $(function (){
         return ret
     }
 
+$(function (){
+
+    /*
+
+    Resizale layout
+
+    */
     document.getElementById('pg').style.height = ($(window).height() - 250 - $("#myform").height()).toString()+"px";
     
     $("#biblio-txt-test").on("mousemove", function () {
         document.getElementById('pg').style.height = ($(window).height() - 250 - $("#myform").height()).toString()+"px";
-   })
+    })
 
     $(window).on("resize", function () {
         document.getElementById('pg').style.height = ($(window).height() - 250 - $("#myform").height()).toString()+"px";
-  })
-
+    })
+    /*
     
+    Loading Cg instance (authors, papers...)
 
-
+    */
     choosen_j = "cg"
     let instance  = choosen_j
      if(!j_lists[instance]){
@@ -291,6 +278,11 @@ $(function (){
     console.log("Loading data")
     import_ds(ppath, apath)
     console.log("Data Loaded")
+    /*
+
+    Setting up svg and axis
+
+    */
     document.getElementById("svgAxis").style.visibility = "visible";
     width = $("#pg").width()
     w = width
@@ -312,7 +304,6 @@ $(function (){
 
     getPaperSvg()
 
-  //document.getElementById("svgAxis").style.visibility = "hidden";
     popRectAx = d3.select("#svgAxis").append("rect")
     .attr('x',0)
     .attr('y',-10)
@@ -332,9 +323,14 @@ $(function (){
     .text("");
 
     simulation = setSimulation()
-        
-    alert("data loaded")
-
+    
+    /*
+    Parse button handler:
+        - parse query
+        - populate a graph expanding
+          the parsed papers and their citations
+        - compute some stats 
+    */
     $("#cit-btn-test").on("click", function (){
         let len = document.getElementById("biblio-txt-test").value.split('\n\n').length,
             URL = "http://128.148.7.71/citations/create",
@@ -342,7 +338,7 @@ $(function (){
             query =  clean_biblio_query(document.getElementById("biblio-txt-test").value),
             params = 'query='+query.join("\n"),
             i = 0, titles = [], result = [], query_tab =  `<table id="query_tab"><tbody>`,
-            chosenpps = [];
+            pps = [], pp = [];
         
         for(i = 0; i< query.length; i++)
             titles.push(query[i])
@@ -358,8 +354,11 @@ $(function (){
                 papr = papers[chosen_p_idx],
                 query = current_query_result[idq].query,
                 auths = pap_auths1(papr), title = papr.value, year = papr.year, jon = papr.jN ? papr.jN : papr.venue;
-            
-            push_paper(papr.value, papr.year)
+            idP = papr.id
+            if(!idPs.includes(idP)){
+                idPs.push(idP)
+                papersPrint.push(idP)
+            }
             query_tab +=  `<tr id="q${idq}"><td class="query">
                 <p>Query: ${query}</p><hr style="margin: 5px;" />`;/*
                 <p>Result: ${year} ${auths}: <span class="eli-pap">
@@ -369,13 +368,59 @@ $(function (){
         }
         query_tab +=`</tr></tbody></table>`;
 
-        /*Draw graph*/
 
+
+        /*
+
+        Search for citations
+        
+        */
+        let tmp = citations.filter(  (el) => 
+            typeof(el.source)==='string'? papersPrint.includes(el.source) || papersPrint.includes(el.target) :
+            papersPrint.includes(el.source.id) || papersPrint.includes(el.target.id)
+            )
+        tmp.map(function(el){
+            if(typeof(el.source)==='string'){
+                if(!papersPrint.includes(el.source)) {papersPrint.push(el.source); idPs.push(el.source)}
+                if(!papersPrint.includes(el.target)) {papersPrint.push(el.target); idPs.push(el.target)}
+            }
+            else{
+                if(!papersPrint.includes(el.source.id)) {papersPrint.push(el.source.id); idPs.push(el.source.id)}
+                if(!papersPrint.includes(el.target.id)) {papersPrint.push(el.target.id); idPs.push(el.target.id)}
+        }
+        })
+        console.log(papersPrint.length+" papers to expand")
+        /*
+        
+        Repeat the filtering to expand the graph
+        
+        */
+        citPrint = citations.filter( (el) => 
+            typeof(el.source)==='string'? papersPrint.includes(el.source) || papersPrint.includes(el.target) :
+            papersPrint.includes(el.source.id) || papersPrint.includes(el.target.id)
+            )
+        citPrint.map(function(el){
+            if(typeof(el.source)==='string'){
+                if(!papersPrint.includes(el.source)) papersPrint.push(el.source)
+                if(!papersPrint.includes(el.target)) papersPrint.push(el.target)
+            }
+            else{
+                if(!papersPrint.includes(el.source.id)) papersPrint.push(el.source.id)
+                if(!papersPrint.includes(el.target.id)) papersPrint.push(el.target.id)
+        }
+        })
+        /*
+        
+        Draw graph
+        
         if(papersFiltered.length > 0 && papersFiltered)
             paper_graph(papersFiltered, citPrint, idPs, simulation)
+        
+        */
+        papersFiltered = papers.filter(paperFilter)
+        console.log(papersPrint.length+" total papers in the graph")
 
-        document.getElementById("all1").innerHTML = 
-            "Parsing result"+
+        document.getElementById("all1").innerHTML = "Parsing result"+
             "<hr>"+ query_tab+`<br>${graph_stats()}`;
 
     });
@@ -383,38 +428,7 @@ $(function (){
 
 
 });
-    //Send the proper header information along with the request
-    
-    //http.open('POST', URL1, true);
-    //http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-/*
-    http.onload = function (e) {
-    if (http.readyState === 4) {
-        if (http.status === 200) {
-            response = JSON.parse(http.responseText)
-            //console.log(response)
-          import_from_biblio(response, query);
-        } else {
-          console.error(http.statusText);
-        }
-      }
-    };
-    http.onerror = function (e) {
-      console.error(http.statusText);
-        alert("Some error occurred, check the connection and try again.")
-    };
-
-    http.send(params);
-    })
-*/  
-    
-   
-/*
-query -> best-matches -> grafo best-matches
-*/ 
-
-
-
+ 
 
 </script>
 

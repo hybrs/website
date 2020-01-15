@@ -590,7 +590,7 @@ function setSimulation(){
                 .strength(-30)
                 .theta(0.1);//d3.forceY().strength(-100).y(heightP / 2);
         simulation.force("charge", frc)
-        .force("collide", d3.forceCollide(10))
+        //.force("collide", d3.forceCollide(10))
         .force("center", d3.forceCenter((w / 2), (heightP / 2)))
         .force("forceY",  d3.forceY().strength(0.018)
         .y(heightP/2))
