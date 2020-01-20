@@ -410,15 +410,17 @@ $(function (){
                 if(!papersPrint.includes(el.target.id)) papersPrint.push(el.target.id)
         }
         })
+        
+        
+        
+        papersFiltered = papers.filter(paperFilter)
+        console.log(papersPrint.length+" total papers in the graph")
+
         /*
         
         Draw graph
         */
         paper_graph(papersFiltered, citPrint, idPs, simulation)
-        
-        
-        papersFiltered = papers.filter(paperFilter)
-        console.log(papersPrint.length+" total papers in the graph")
 
         document.getElementById("all1").innerHTML = "Parsing result"+
             "<hr>"+ query_tab+`<br>${graph_stats()}`;
