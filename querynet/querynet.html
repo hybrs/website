@@ -214,6 +214,7 @@
                 .links(citations1);
             simulation.alpha(1).alphaMin(0.02).alphaDecay(0.02).restart()
         }
+
         d3.selectAll(".dblp").on("click", function(){d3.event.stopPropagation()})
 
         
@@ -413,8 +414,7 @@ $(function (){
         
         Draw graph
         */
-        if(papersFiltered && papersFiltered.length > 0)
-            paper_graph(papersFiltered, citPrint, idPs, simulation)
+        paper_graph(papersFiltered, citPrint, idPs, simulation)
         
         
         papersFiltered = papers.filter(paperFilter)
